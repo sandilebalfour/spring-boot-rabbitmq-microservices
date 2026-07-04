@@ -57,18 +57,25 @@ Postgres: localhost:5432
 
 ## **3.** ## **Test the Flow**
 
+Create an order:
 ```bash
 curl -X POST http://localhost:8081/orders \
 -H "Content-Type: application/json" \
 -d '{"email": "test@example.com"}'
 ```
-   Expected Response:json{"status":"Order created","orderId":"550e8400-e29b-41d4-a716-446655440000"}Expected MailService Log:javascript=========================================
-   SENDING EMAIL TO: wtc@test.com
-   Subject: Order 550e8400-e29b-41d4-a716-446655440000 Confirmed
-   Body: Thanks for order #550e8400-e29b-41d4-a716-446655440000 - PopOS Laptop x1
-   =========================================
+Expected response: Order 1 saved and sent to queue
 
-
+Check the DB:
+```bash
+podman exec -it order-db psql -U postgres -d ordersdb -c "select * from orders;"
+```
+Check mail-service received it:
+```bash
+podman logs spring-boot-rabbitmq-microservices-demo_mail-service_1 --tail 10
+```
+You should see:
+EMAIL FIELD: test@example.com
+Subject: Order 1 Confirmed
 
 ## **4. Stop**
 
