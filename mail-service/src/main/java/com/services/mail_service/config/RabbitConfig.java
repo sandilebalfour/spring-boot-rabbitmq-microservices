@@ -10,22 +10,16 @@ import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
 @Configuration
 public class RabbitConfig {
+    public static final String EXCHANGE = "order.exchange";
+    public static final String ROUTING_KEY = "order.created";
+    public static final String QUEUE = "order.created.queue";
 
-    @Bean
-    public MessageConverter jsonMessageConverter() {
-        return new Jackson2JsonMessageConverter();
+    @Bean Queue queue() { return new Queue(QUEUE, true); }
+    @Bean TopicExchange exchange() { return new TopicExchange(EXCHANGE); }
+    @Bean Binding binding(Queue queue, TopicExchange exchange) {
+        return BindingBuilder.bind(queue).to(exchange).with(ROUTING_KEY);
     }
-
-    @Bean
-    public Queue queue() { return new Queue("order.created.queue", true); }
-
-    @Bean
-    public TopicExchange exchange() { return new TopicExchange("orders.exchange"); }
-
-    @Bean
-    public Binding binding(Queue q, TopicExchange e) {
-        return BindingBuilder.bind(q).to(e).with("orders.created");
-    }}
+    @Bean MessageConverter jsonMessageConverter() { return new Jackson2JsonMessageConverter(); }
+}

@@ -1,21 +1,42 @@
 version: '3.8'
 services:
+  postgres:
+    image: docker.io/postgres:16
+    container_name: order-db
+    environment:
+      POSTGRES_DB: ordersdb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
   rabbitmq:
     image: docker.io/rabbitmq:3.13-management
     ports:
       - "5672:5672"
-      - "15672:15672" # Management UI: http://localhost:15672 guest/guest
+      - "15672:15672"
+
   order-service:
     build: ./order-service
     ports:
       - "8081:8081"
     depends_on:
+      - postgres
       - rabbitmq
     environment:
       - SPRING_RABBITMQ_HOST=rabbitmq
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/ordersdb
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=postgres
+
   mail-service:
     build: ./mail-service
     depends_on:
       - rabbitmq
     environment:
       - SPRING_RABBITMQ_HOST=rabbitmq
+
+volumes:
+  pgdata:

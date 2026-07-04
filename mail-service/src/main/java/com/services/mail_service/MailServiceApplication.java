@@ -1,6 +1,8 @@
 package com.services.mail_service;
 
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.services.mail_service.event.OrderCreatedEvent;
 import org.springframework.amqp.core.*;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConverter;
@@ -19,15 +21,14 @@ public class MailServiceApplication {
 //	@RabbitListener(queues = "order.created.queue")
 //	public void handle(OrderCreatedEvent event) {
 //		System.out.println("EMAIL SERVICE GOT: " + event);
+
 //	}
+
 	@RabbitListener(queues = "order.created.queue")
 	public void handle(OrderCreatedEvent event) {
-		System.out.println("=========================================");
-		System.out.println("SENDING EMAIL TO: " + event.email());
-		System.out.println("Subject: Order " + event.orderId() + " Confirmed");
-		System.out.println("Body: Thanks for order #" + event.orderId());
-		System.out.println("=========================================");
+		 // this will show OrderCreatedEvent[orderId=101, email=null]
+		System.out.println("EMAIL FIELD: " + event.getEmail());
+		System.out.println("Subject: Order " + event.getOrderId() + " Confirmed");
 	}
 
-	public record OrderCreatedEvent(Long orderId, String email) {}
 }
